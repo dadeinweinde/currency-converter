@@ -58,6 +58,11 @@ async function main() {
   const from = args[1].toUpperCase();
   const to = args[2].toUpperCase();
 
+  if (isNaN(amount) || amount <= 0) {
+    console.log('Сумма должна быть положительным числом');
+    return;
+  }
+
   try {
     const result = await convertCurrency(amount, from, to);
     console.log(`${amount} ${from} = ${result.toFixed(2)} ${to}`);
@@ -66,7 +71,11 @@ async function main() {
     console.log(`Курс: 1 ${from} = ${rates.conversion_rates[to]} ${to}`);
     console.log(`Обновлено: ${rates.time_last_update_utc}`);
   } catch (error) {
-    console.error('Ошибка:', error);
+    if (error instanceof Error) {
+      console.log(`Не удалось выполнить конвертацию: ${error.message}`);
+    } else {
+      console.log('Произошла неизвестная ошибка');
+    }
   }
 }
 
