@@ -12,5 +12,5 @@
 
 1. Клонируйте репозиторий:
 `bash
-git clone <ваш-репозиторий-url>
+git clone <https://github.com/dadeinweinde>
 cd currency-converter

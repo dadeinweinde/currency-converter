@@ -6,6 +6,7 @@ dotenv.config();
 const API_KEY = process.env.API_KEY;
 const BASE_URL = 'https://v6.exchangerate-api.com/v6';
 
+// Тип ответа от API
 interface ExchangeRateResponse {
   result: string;
   conversion_rates: Record<string, number>;
@@ -13,16 +14,15 @@ interface ExchangeRateResponse {
   time_last_update_utc: string;
 }
 
+// Получить курсы для базовой валюты
 async function getRates(baseCurrency: string): Promise<ExchangeRateResponse> {
   try {
     const response = await axios.get<ExchangeRateResponse>(
       `${BASE_URL}/${API_KEY}/latest/${baseCurrency}`
     );
-
     if (response.data.result === 'error') {
-      throw new Error('Ошибка API');
+      throw new Error('Ошибка API: неверная валюта или ключ');
     }
-
     return response.data;
   } catch (error) {
     console.error('Ошибка при получении курсов:', error);
@@ -30,6 +30,7 @@ async function getRates(baseCurrency: string): Promise<ExchangeRateResponse> {
   }
 }
 
+// Конвертировать сумму из одной валюты в другую
 async function convertCurrency(
   amount: number,
   from: string,
@@ -37,14 +38,13 @@ async function convertCurrency(
 ): Promise<number> {
   const data = await getRates(from);
   const rate = data.conversion_rates[to];
-
   if (!rate) {
-    throw new Error(`Валюта ${to} не найдена`);
+    throw new Error(`Валюта "${to}" не найдена в списке`);
   }
-
   return amount * rate;
 }
 
+// Главная функция (запуск из командной строки)
 async function main() {
   const args = process.argv.slice(2);
 
@@ -72,9 +72,9 @@ async function main() {
     console.log(`Обновлено: ${rates.time_last_update_utc}`);
   } catch (error) {
     if (error instanceof Error) {
-      console.log(`Не удалось выполнить конвертацию: ${error.message}`);
+      console.error(`Ошибка: ${error.message}`);
     } else {
-      console.log('Произошла неизвестная ошибка');
+      console.error('Неизвестная ошибка');
     }
   }
 }
